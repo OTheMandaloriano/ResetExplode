@@ -1,188 +1,175 @@
-# RESET EXPLODE — v0.16
+﻿<div align="center">
 
-> **Download oficial:** apenas em [github.com/GustavoReset/ResetExplode/releases](https://github.com/GustavoReset/ResetExplode/releases).
-> O app roda como administrador; não use versões baixadas de outros lugares.
->
-> **Contribuições:** este projeto não aceita pull requests. Fique à vontade para fazer um *fork* e modificar a sua própria cópia
-> (licença [MIT](LICENSE): mantenha o aviso de copyright).
+<a href="README.md"><img src="https://api.iconify.design/flag/br-4x3.svg?width=24" alt="Português" title="Português" /></a>
 
-## Novidades da v0.16
-- **Inicialização** (RESET FERRAMENTAS): veja, desative ou remova os programas que abrem junto com o Windows, com opção de desfazer.
-- **Instalar apps** (RESET FERRAMENTAS): Steam, Chrome, Discord, Lightshot, 7-Zip, WinRAR e VLC de uma vez depois de formatar, pelo winget.
-- **RESET MAKER** (nova categoria): Portas COM (fantasmas e números COM presos, que saiu de Otimização) e Drivers seriais
-  (CH340, CP2102, FTDI, Prolific e Arduino: diagnóstico, reinstalar, trocar ou remover versão do driver, Arduino IDE).
-- **Abertura mais rápida**: a janela aparece em ~0,5 s (antes ~4,6 s); o hardware é lido em paralelo, em segundo plano.
-- **Overlay corrigido**: fica por cima de jogos em janela sem borda como GTA V e Cyberpunk 2077 e segue o monitor do jogo.
+<br><br>
 
-Detalhes em [NOVIDADES.md](NOVIDADES.md) (o mesmo texto vai nas notas da release).
+<a href="https://github.com/OTheMandaloriano/ResetExplode">
+  <img src="Assets/logo-badge.png" alt="RESET EXPLODE Logo" width="128" height="128" />
+</a>
 
-App WPF (.NET 8) com:
-- **Informações do sistema** (categorias + detalhes): SO, placa-mãe/BIOS, CPU, RAM (por módulo), GPU, discos — via WMI.
-  Em Armazenamento, cartões por unidade (C:, pendrive, HD externo, rede) com anel de cheio/vazio, tipo e disco físico (`DriveMap.cs`).
-- **Avisos de dispositivo** (`ToastWindow.xaml`): ao conectar/remover pendrive, HD externo ou qualquer dispositivo USB (ex.: Arduino),
-  aparece um aviso no canto da tela e a lista de unidades se atualiza (via `WM_DEVICECHANGE`, sem ficar consultando).
-- **Sensores em tempo real**: temperatura, clock, carga, voltagem, ventoinhas, consumo etc. — via LibreHardwareMonitorLib. Atualiza a cada 1 s, com filtro por tipo.
-- **Placa de vídeo** (estilo GPU-Z): chip, arquitetura, processo, die, transistores, shaders/SMs/Tensor/RT, ROPs/TMUs, fillrates, TFLOPS,
-  memória (tamanho, tipo, barramento, clock, banda, Resizable BAR), clocks, PCIe (máximo e em uso), limites de energia,
-  VBIOS, driver, assinatura WHQL, CUDA, DirectX (feature level), APIs e recursos da arquitetura.
-  Sensores ao vivo da GPU + P-state, PerfCap, NVENC/NVDEC. Fontes: NVML (NVIDIA), DXGI/Direct3D 12, WMI/PnP, registro e banco de specs em `GpuSpecDb.cs`.
-- **Stress test**: carga de CPU em todos os threads (FPU + inteiros) e/ou RAM (grava e verifica padrões em 40–80% da memória livre).
-  Para sozinho quando a temperatura da CPU atinge o limite configurado, quando o tempo acaba ou se aparecer erro de memória.
-  Mostra temperatura atual/máxima, carga, consumo, gráfico dos últimos 5 min e um log dos eventos.
-- **Stress de GPU** (inspirado no FurMark, `GpuBurn.cs`): torus com pelos renderizado por *shells* em Direct3D 11 (Vortice),
-  com overdraw massivo, cadeia de FMAs no pixel shader e alpha blending, sem limite de FPS, numa janela própria.
-  Opções: resolução (720p/1080p/1440p/tela cheia), MSAA (off/4x/8x), intensidade (Normal/Alta/Extrema) e limite de temperatura da GPU.
-  Mostra FPS, temperatura, consumo e PerfCap; ao final registra frames e FPS médio. ESC ou fechar a janela encerra o teste.
-  Medido numa RTX 5070 (1080p, 4x MSAA, Alta): ~99% de uso e 220–232 W de 250 W.
-- **Jogos**: FPS esperado em 32 jogos populares para a sua GPU + CPU, por resolução (1080p/1440p/4K), gráficos e upscaling (DLSS/FSR).
-  Com chave da [HowManyFPS API](https://howmanyfps.com/developer-api) (pedida em info@howmanyfps.com) mostra FPS médio e 1% low medidos em sessões reais;
-  sem chave, usa uma estimativa local aproximada (`GameCatalog.cs`). A chave fica cifrada com DPAPI em `%AppData%\ResetExplode` e as respostas em cache por 7 dias.
-- **Detector de gargalo**: equilíbrio teórico GPU × CPU; leitura ao vivo (carga da GPU, CPU total, núcleo mais ocupado, VRAM, RAM,
-  temperaturas, limitador térmico) com veredito; e análise de sessão (1/3/5 min) com % do tempo limitado por GPU, CPU, VRAM, RAM,
-  temperatura ou trava de FPS, mais recomendações (`BottleneckAnalyzer.cs`).
-- **Overlay de jogos** (estilo RTSS/Afterburner, `OverlayWindow.xaml`): FPS, frametime, 1% low, gráfico de frametime, GPU/CPU/RAM/VRAM.
-  Janela transparente, sempre no topo e que ignora cliques; atalho global **Ctrl+Shift+O**. **Itens escolhidos pelo usuário** (`OverlayMetrics.cs`,
-  `MainWindow.Overlay.cs`): FPS/frametime/1% low/gráfico, GPU (uso, temperatura, hotspot, clocks do núcleo e da memória, consumo, tensão,
-  ventoinha, PerfCap), VRAM, CPU (uso, núcleo mais ocupado, temperatura, clock médio e máximo, consumo), RAM, nome do jogo e hora. Volta para o topo a cada troca de janela ativa
-  (jogos em janela sem borda também se marcam como "sempre no topo") e fica no monitor do jogo. Não aparece em tela cheia exclusiva. O FPS de qualquer jogo é medido via ETW
-  (eventos Present de DXGI/D3D9, como o PresentMon, `FrameMonitor.cs`), sem injetar nada no jogo.
-- **RESET BENCH** (`BenchRenderer.cs`): benchmark de CPU no princípio do Cinebench, com renderizador próprio. Path tracer monocromático
-  (iluminação global, sombras suaves, metal e vidro com refração), 960×540 a 1024 amostras/pixel, imagem em blocos de 32 px
-  distribuídos entre threads do centro para fora. Multi-core (todas as threads) e single-core (1 thread, imagem inteira, ~1min40s num 7700X),
-  1 passada ou mínimo de 10 min. Nota = amostras/s ÷ 10.000, determinística (sementes fixas por pixel). Histórico dos últimos 10 resultados.
-  Referência: Ryzen 7 7700X ≈ 4.500 multi / 530 single.
-- **RESET BENCH · benchmarks de jogo**:
-  - *Cena de jogo (GPU)* (`GpuGameBench.cs`): vale em Direct3D 11 com terreno fractal, 40 mil árvores por instancing, sombras 4096² com PCF,
-    água, neblina e pós HDR; câmera em trajeto fixo por tempo, 1080p/1440p/4K, 30/60 s. Nota = FPS médio × 10. RTX 5070 em 1080p ≈ 680 FPS.
-    Os sensores ficam pausados durante o teste (consultas ao driver geravam engasgos no 1% low).
-  - *Ray tracing (GPU)* (`GpuRtBench.cs`, `MainWindow.Rt.cs`): Direct3D 12 com **DXR 1.1** (raios inline num compute shader), usa os núcleos
-    de RT (RTX 20+, Radeon RX 6000+, Intel Arc). 4 mil objetos (fosco, metal, espelho, luzes), path tracing com sombra suave, oclusão de
-    ambiente, reflexos e iluminação indireta; TLAS refeita a cada frame. Presets Normal/Alta/Extrema (2/4/8 amostras, 2/3/4 rebatidas).
-    **Confiabilidade**: aquecimento sem medir + 3 passadas; nota pela mediana (FPS × 10), variação entre passadas (confiável abaixo de 3%),
-    tempo de frame pelos timestamps da GPU. Referência: RX 9070, Alta 1440p, modo Padrão = 878 pts (87,8 FPS), variação 0,5%.
-  - *Simulação de jogo (CPU)* (`GameSimBench.cs`): 30 mil unidades em frente de batalha; thread principal (grade, lógica, preparo do desenho)
-    + workers (física, colisão, IA). Nota = FPS da simulação. Ryzen 7 7700X ≈ 290 FPS.
-  - *Memória e carregamento* (`MemoryBench.cs`): latência e banda da RAM; carregamento de mapa (pacote de 512 MB + mil arquivos de 64 KB)
-    lido sem cache do Windows, com passada prévia para o antivírus e 8 threads. Arquivos temporários apagados no final.
-  - *Disco* (`DiskBench.cs`): leitura e escrita sequencial (1 MB) e aleatória 4K (QD1 e QD32), sem cache do Windows
-    (`FILE_FLAG_NO_BUFFERING`), em arquivo temporário de 512 MB / 1 GB / 4 GB na unidade escolhida; apagado no final. Histórico dos últimos resultados.
-- **RESET OC** (`MainWindow.Oc.cs`, `OcCheck.cs`): ajuste de limite de energia e travamento de clock da GPU NVIDIA (via NVML) com botão de restaurar,
-  e **verificação de estabilidade** de overclock (CPU, GPU ou ambos; 5/15/30 min) com limites de segurança de temperatura, leitura de erros
-  de hardware (WHEA, reset de driver de vídeo), veredito, histórico e guia de BIOS conforme a placa-mãe e a CPU.
-- **RESET OTIMIZA** (`Optimizer.cs`, `WindowsTweaks.cs`): um botão que limpa a memória em espera (como o ISLC) e enxuga a RAM dos
-  processos, e fecha os programas marcados (pré-marca só os seguros: OneDrive, Teams, Widgets, Adobe...; programas com janela são
-  fechados sem forçar). Ajustes do Windows com interruptor e "Restaurar originais": plano Alto desempenho, Modo de Jogo, desativar
-  Game DVR, HAGS, otimizações para jogos em janela, aceleração do mouse. Nada que reduza a segurança (Defender, VBS, UAC, Update).
-- **RESET MAKER** (Arduino, ESP32 e conversores USB-serial):
-  - *Portas COM* (`UsbCleaner.cs`): lista e remove registros de dispositivos USB/seriais ausentes ("fantasmas" de Arduino,
-    ESP32, CH340, FTDI, CP210x...) e libera os números COM presos no ComDB, com backup para desfazer. Resolve a IDE do Arduino
-    não achar a placa ou a porta ir para COM20+.
-  - *Drivers seriais* (`MakerDrivers.cs`, `MainWindow.Maker.cs`): diagnóstico das placas conectadas com **CH340/CH341, CP2102/CP210x,
-    FTDI, Prolific PL2303 e Arduino** pelo código do Gerenciador de Dispositivos (sem driver, código 10, 43, FTDI falsificado com PID 0000),
-    com orientação para cada caso; **REINSTALAR** (remove e detecta de novo); lista das versões de driver guardadas no Windows com
-    **REMOVER** (backup antes, para voltar a uma versão anterior ou desinstalar de vez) e "Restaurar removidos"; **drivers oficiais incluídos no app** (CH340 4.0, CP210x 11.6,
-    FTDI 2.12.36.20 e Arduino, em `Drivers`, veja `Drivers/LEIA-ME.md`) que instalam sem internet; e link para a página oficial de cada fabricante. **Arduino IDE**: instalar/atualizar pelo winget (traz os drivers das placas oficiais),
-    fechar programas que prendem a porta (monitor serial, PuTTY, Cura...) e limpar o cache de índices quando a IDE trava em "Downloading index".
-- **Inicialização** (`StartupManager.cs`, `MainWindow.Startup.cs`): lista os programas que abrem com o Windows (chaves Run do usuário e
-  de todos os usuários, 32 e 64 bits, e pastas Inicializar) com descrição e fabricante. Interruptor para ativar/desativar igual ao
-  Gerenciador de Tarefas (chaves StartupApproved) e botão REMOVER, com cópia em `%AppData%\ResetExplode` para "Restaurar removidos".
-- **Instalar apps** (`AppInstaller.cs`, `MainWindow.Apps.cs`): instala os essenciais pós-formatação (Steam, Google Chrome, Discord,
-  Lightshot, 7-Zip, WinRAR, VLC) pelo **winget**, em silêncio e um de cada vez, mostrando o resultado de cada um. Detecta o que já está
-  instalado (Aplicativos instalados do Windows). Para incluir outro app, acrescente uma linha em `AppInstaller.Catalog()` com o ID do winget.
-- **Saúde dos discos (S.M.A.R.T.)** (`DiskHealth.cs`, `MainWindow.Disks.cs`): página própria com um cartão por disco físico —
-  veredito (Bom/Atenção/Ruim) com os motivos, temperatura, horas ligado, ciclos, desgaste do SSD, setores realocados, erros de leitura/escrita
-  e previsão de falha. Fontes: Windows Storage (MSFT_PhysicalDisk, MSFT_StorageReliabilityCounter) e MSStorageDriver_FailurePredictStatus.
-- **Relatório exportável** (`ReportBuilder.cs`): botão **EXPORTAR RELATÓRIO** em Sistema. Gera um arquivo HTML (com a marca RESET) ou JSON
-  com as informações do sistema, RAM por módulo, discos e saúde dos discos.
-- **RAM detalhada**: resumo (capacidade, canais, tipo DDR4/DDR5/LPDDR5, velocidade) e, por módulo, fabricante, part number, formato,
-  voltagem, clock configurado e localização do slot.
-- **Energia** (`BatteryInfo.cs`, `MainWindow.Net.cs`): bateria de notebook com desgaste (capacidade atual × de projeto), ciclos de carga, estado,
-  autonomia, tensão e potência, com veredito; fonte de energia (tomada/bateria), plano de energia do Windows e consumo dos sensores de CPU e GPU.
-  Em PC de mesa mostra só o cartão de energia.
-- **Rede** (`NetworkTest.cs`): diagnóstico de lag em ~30 s — latência, jitter e perda de pacotes até o roteador e até a internet (1.1.1.1 e 8.8.8.8),
-  tempo de DNS, velocidade de download/upload (servidor público speed.cloudflare.com) e latência sob carga (bufferbloat). O veredito aponta se o
-  problema está na rede local (Wi-Fi/cabo/roteador), no provedor ou se a conexão está estável.
-- **RESET INTEGRAÇÃO** (`LightBackends.cs`, `CorsairSdk.cs`, `CorsairSdkInstaller.cs`, `MainWindow.Integ.cs`): controle de iluminação e efeitos
-  de todo o PC numa tela só (em teste). Pontes: **Corsair iCUE / iCUE LINK** (iCUE SDK v4; a DLL é baixada pelo programa, com confirmação e
-  verificação de assinatura), **OpenRGB** (servidor SDK local; é o caminho para **MSI Mystic Light, Gigabyte RGB Fusion, ASUS Aura**, RAM, Razer,
-  Logitech e outras, já que essas marcas não têm SDK público) e **Razer Chroma** (API REST do Synapse). Efeitos: cor fixa, respiração, arco-íris em onda,
-  e cores que seguem a **temperatura da CPU/GPU** ou a **carga da CPU**, com brilho e velocidade. Ao devolver ou fechar, cada fabricante reassume as luzes.
-  Para MSI/Gigabyte/ASUS: abra o OpenRGB com o servidor ligado e feche MSI Center, Armoury Crate e RGB Fusion.
-- **RESET JOGOS** (`GameLibrary.cs`, `GameLauncher.cs`, `Vdf.cs`, `MainWindow.Launcher.cs`): inicializador que **detecta os jogos instalados** (Steam, Epic Games, GOG,
-  Ubisoft Connect e `.exe` adicionados à mão) e guarda um **perfil por jogo**: prioridade do processo, plano de energia Alto desempenho só durante o jogo,
-  GPU dedicada e sem otimizações de tela cheia (por `.exe`, no registro do usuário), **menu de gráficos** (modo de janela, resolução, taxa de atualização e extras
-  convertidos em argumentos de inicialização no estilo Source/CS2, Unity ou Unreal) e **programas auxiliares** (ferramentas de terceiros que abrem antes do jogo
-  e fecham junto). Em jogos da Steam, um botão grava os argumentos nas **opções de inicialização** (`localconfig.vdf`, com backup, fechando a Steam antes).
-  O botão JOGAR aplica o perfil, inicia e desfaz o que for temporário quando o jogo fecha.
+# RESET EXPLODE
 
-## Interface
-- Visual preto e branco minimalista em **blocos** (cartões arredondados, inspirado em painéis de dashboard). Um único menu lateral
-  com *Visão geral* no topo e categorias **RESET** recolhíveis (começam fechadas; clique para ver as sub-abas):
-  - *Visão geral* (`MainWindow.Dash.cs`): gráfico de área CPU × GPU (temperatura, carga ou consumo; 1/5/15 min),
-    desempenho do RESET BENCH, tabela de componentes, anéis de RAM/VRAM/disco, eventos recentes e saúde do PC.
-  - **RESET EXPLODE** · Sistema, Sensores, Placa de vídeo, Discos, Energia, Rede.
-  - **RESET JOGOS** · Biblioteca, FPS estimado, Gargalo, Overlay.
-  - **RESET DESEMPENHO** · Benchmark, Stress test, Overclock.
-  - **RESET FERRAMENTAS** · Otimização, Inicialização, Instalar apps, Drivers, Integração.
-  - **RESET MAKER** · Portas COM, Drivers seriais.
-- Botão de **modo escuro/claro** no canto superior direito (`ThemeManager.cs`); a escolha fica salva. O overlay de jogos e os avisos de dispositivo ficam sempre escuros.
-- Leitura ao vivo de temperatura e carga da CPU e da GPU sempre visível no rodapé do menu.
-- Sensores com busca e filtros por tipo (chips); tema em `Theme.xaml`.
+**Central de diagnóstico, telemetria de hardware em tempo real, benchmarks gráficos e ferramentas de manutenção para Windows.**
 
-## Base utilizada
-- Interface, stress test e gráficos: código próprio.
-- Sensores: [LibreHardwareMonitorLib](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) (MPL 2.0) — mantenha o aviso de licença ao distribuir.
-- Informações do sistema: WMI do Windows.
-- Medição de FPS: [TraceEvent](https://github.com/microsoft/perfview) (MIT), da Microsoft, para ler eventos ETW.
-- Renderização do stress de GPU: [Vortice.Windows](https://github.com/amerkoleci/Vortice.Windows) (MIT), bindings de Direct3D 11 para .NET. Direct3D 12 e DXC (compilador de shaders da Microsoft) também via Vortice, no teste de ray tracing.
+<br>
 
-## Requisitos
-- Windows 10/11
-- .NET 8 SDK (https://dotnet.microsoft.com/download)
-- Driver **PawnIO** (temperatura/consumo da CPU): `winget install namazso.PawnIO`
-  A LibreHardwareMonitorLib 0.9.6+ usa o PawnIO no lugar do antigo WinRing0, que o Windows Defender bloqueia.
+[![.NET 8](https://img.shields.io/badge/.NET_8-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
+[![WPF](https://img.shields.io/badge/WPF-0078D7?style=for-the-badge&logo=windows&logoColor=white)](https://learn.microsoft.com/dotnet/desktop/wpf/)
+[![DirectX](https://img.shields.io/badge/DirectX_11_%2F_12-000000?style=for-the-badge&logo=directx&logoColor=white)](https://microsoft.github.io/DirectX-Specs/)
+[![Windows](https://img.shields.io/badge/Windows-10_%7C_11-0078D4?style=for-the-badge&logo=windows11&logoColor=white)](https://microsoft.com/windows)
 
-## Como rodar
-```
+<br>
+
+[![Versão](https://img.shields.io/badge/versão-v0.16-10B981?style=flat-square)](https://github.com/OTheMandaloriano/ResetExplode/releases/tag/latest)
+[![Status do Build](https://img.shields.io/badge/build-estável-10B981?style=flat-square)](https://github.com/OTheMandaloriano/ResetExplode/releases)
+[![Licença](https://img.shields.io/badge/licença-MIT-0EA5E9?style=flat-square)](LICENSE)
+[![Arquitetura](https://img.shields.io/badge/arquitetura-x64-64748B?style=flat-square)](https://github.com/OTheMandaloriano/ResetExplode)
+
+<br>
+
+[Download Executável](https://github.com/OTheMandaloriano/ResetExplode/releases/tag/latest) • [Módulos e Recursos](#-módulos-e-recursos) • [Requisitos](#-requisitos-do-sistema) • [Como Rodar](#-como-rodar-do-código-fonte) • [Limitações](#-limitações-conhecidas)
+
+</div>
+
+---
+
+## <img src="https://api.iconify.design/solar/info-circle-bold.svg?color=%230EA5E9&width=22" align="top" /> &nbsp;Visão Geral
+
+O **RESET EXPLODE** é um aplicativo de desktop para Windows desenvolvido em C# e .NET 8 que reúne, em uma interface unificada e minimalista, as atribuições de múltiplos utilitários técnicos de monitoramento e teste de carga (como GPU-Z, Cinebench, FurMark, RTSS/Afterburner e CrystalDiskInfo).
+
+Projetado para entusiastas de hardware, técnicos e jogadores, o software combina leitura de sensores em tempo real, bateria de testes com renderizadores 3D próprios (Direct3D 11 e Direct3D 12 Ray Tracing), detecção de gargalos, overlay de performance sem injeção de DLLs e ferramentas de configuração pós-formatação.
+
+> [!IMPORTANT]
+> O programa efetua leituras de registradores e sensores em baixo nível, além de gerenciar serviços e dispositivos. A execução com **privilégios de Administrador** é obrigatória.
+
+---
+
+## <img src="https://api.iconify.design/solar/download-square-bold.svg?color=%2310B981&width=22" align="top" /> &nbsp;Download e Execução Rápida
+
+As compilações oficiais pré-construídas estão disponíveis na seção de lançamentos do repositório:
+
+1. Acesse a página de [Releases do Repositório](https://github.com/OTheMandaloriano/ResetExplode/releases/tag/latest).
+2. Baixe o executável autônomo `ResetExplode.exe` ou o pacote comprimido `ResetExplode.zip`.
+3. Certifique-se de que o driver de sensores [PawnIO](#-requisitos-do-sistema) esteja instalado no sistema operacional.
+4. Execute o arquivo com botão direito: **Executar como Administrador**.
+
+---
+
+## <img src="https://api.iconify.design/solar/widget-bold.svg?color=%230EA5E9&width=22" align="top" /> &nbsp;Módulos e Recursos
+
+O aplicativo organiza suas funcionalidades em seis categorias principais com carregamento paralelo e instantâneo:
+
+### 1. Monitoramento e Telemetria
+- **Visão Geral e Painel Dinâmico**: Gráficos de área de CPU versus GPU (temperatura, carga e consumo com intervalos de 1, 5 e 15 minutos), resumo de hardware, anéis de consumo de RAM, VRAM e discos.
+- **Sensores em Tempo Real**: Telemetria ao vivo com taxa de atualização de 1 segundo (clocks, temperaturas, tensões, ventoinhas e potências), incluindo busca textual e filtros de visualização por circuito integrado.
+- **Detecção Avançada de GPU (Estilo GPU-Z)**: Identificação completa de die, litografia, contagem de transistores, SMs, núcleos Tensor/RT, barramento PCIe negociado versus máximo, suporte a Resizable BAR, estados P-State, sensores NVML e códigos PerfCap.
+- **Saúde e Diagnóstico S.M.A.R.T. de Discos**: Leitura direta via Windows Storage e drivers de integridade, apontando veredito (Bom, Atenção ou Ruim), temperatura de operação, horas de uso, ciclos de alimentação, desgaste percentual de SSD e alertas preditivos de falha.
+- **Energia e Bateria**: Análise de notebooks com contagem de ciclos, capacidade de fábrica versus atual, veredito de desgaste, taxas de descarga em Watts e monitoramento de plano de energia do Windows.
+- **Diagnóstico de Conexão e Rede**: Teste rápido de estabilidade em 30 segundos, medindo latência, jitter, perda de pacotes contra DNS públicos (1.1.1.1 e 8.8.8.8), bufferbloat sob carga e velocidade de download e upload.
+- **Exportação de Relatórios Técnicos**: Geração de dossiê completo de inventário e saúde em formato HTML padronizado ou JSON estruturado.
+
+### 2. Desempenho e Stress Tests
+- **RESET BENCH (CPU Path Tracer)**: Renderizador monocromático próprio com iluminação global, materiais metálicos e refração em vidro. Modos Multi-core e Single-core baseados em sementes de cálculo determinísticas para aferição pontual de pontuação por amostras/segundo.
+- **Cena de Jogo (GPU D3D11)**: Teste automatizado com renderização de terreno procedural, instanciamento de 40.000 árvores, mapas de sombra 4096² com filtragem PCF e pós-processamento HDR em 1080p, 1440p e 4K.
+- **Ray Tracing GPU (DXR 1.1 Direct3D 12)**: Benchmark em compute shader puro que estressa diretamente os núcleos RT de placas RTX 20+, Radeon RX 6000+ e Intel Arc, calculando 4.000 objetos dinâmicos com reconstrução de aceleração TLAS frame a frame.
+- **Stress Test de CPU e Memória**: Carga pesada contínua multithread (instruções inteiras e FPU) combinada com verificação de padrões em 40% a 80% da memória RAM livre, com desligamento automático programável por temperatura limite.
+- **Stress de GPU (GpuBurn D3D11)**: Renderizador focado em consumo térmico máximo (análogo ao FurMark), com geometria complexa de torus e múltiplos passos de alpha blending, exibindo telemetria em tempo real de consumo em Watts e limitadores.
+
+### 3. Jogos e Otimização
+- **Detector de Gargalo**: Cruzamento analítico de equilíbrio entre processador e placa de vídeo em sessões de jogo, mapeando o percentual de tempo em que a taxa de quadros foi contida por CPU, GPU, limite térmico ou restrições de VRAM.
+- **Overlay de Desempenho**: Janela transparente de monitoramento em tempo real (FPS, frametime, 1% low, consumo, temperaturas e frequências) posicionada sobre a janela do jogo ativo via atalho global `Ctrl+Shift+O`.
+- **Biblioteca e Perfis por Título**: Inicializador integrado com detecção de instaladores (Steam, Epic Games, GOG e executáveis manuais), aplicando ajustes automáticos de prioridade de processo, plano de energia de alto desempenho e gravação de parâmetros de inicialização no `localconfig.vdf` da Steam.
+
+### 4. Ferramentas de Manutenção
+- **Gerenciador de Inicialização**: Inventário de entradas Run do registro do Windows (usuário e máquina, 32 e 64 bits) e pastas de inicialização, permitindo ligar, desligar ou remover itens com suporte à reversão em caso de engano.
+- **Instalador de Aplicativos Pós-Formatação**: Automação de download e instalação silenciosa de utilitários essenciais (Steam, Google Chrome, Discord, Lightshot, 7-Zip, WinRAR e VLC) por meio do Microsoft Winget oficial.
+- **Gerenciador de Drivers**: Auditoria de drivers instalados no sistema, verificação e download de versões oficiais NVIDIA com conferência de assinatura WHQL e atalhos diretos para suporte de fabricantes.
+
+### 5. Suporte a Maker e Portas Seriais
+- **Limpeza de Portas COM**: Varredura e desinstalação de identificadores fantasmas e números de portas seriais retidos no registro por dispositivos desconectados.
+- **Diagnóstico e Reparo de Chips Seriais**: Diagnóstico automático de conversores USB-serial (CH340, CP2102, FTDI, Prolific e Arduino), com detecção de falhas de código 10, código 43 e reinstalação limpa.
+- **Drivers Oficiais Embutidos**: Instaladores integrados e assinados para operação offline imediata, dispensando conexão com a internet.
+
+### 6. Integração e Controle de Iluminação
+- **Controle Unificado de RGB**: Ponte para gerenciamento de periféricos e gabinetes via Corsair iCUE (SDK v4), OpenRGB (servidor local para placas-mãe ASUS, MSI e Gigabyte) e Razer Chroma.
+- **Modos Reativos**: Sincronização da cor e intensidade dos LEDs conforme a temperatura ou a porcentagem de uso do processador e da placa de vídeo.
+
+---
+
+## <img src="https://api.iconify.design/solar/checklist-minimalistic-bold.svg?color=%230EA5E9&width=22" align="top" /> &nbsp;Requisitos do Sistema
+
+| Componente | Requisito Mínimo | Observações |
+| :--- | :--- | :--- |
+| **Sistema Operacional** | Windows 10 ou Windows 11 (64-bit) | Versões 1909 ou superior recomendadas |
+| **Ambiente de Execução** | .NET 8 Desktop Runtime (x64) | Necessário apenas para build local (embutido no `.exe` da release) |
+| **Driver de Sensores** | **PawnIO** | Essencial para a leitura de temperatura e consumo de CPU |
+| **Placa de Vídeo** | Compatível com DirectX 11 | Suporte a DirectX 12 e DXR 1.1 obrigatório apenas para o benchmark de Ray Tracing |
+| **Privilégios** | Acesso de Administrador | Obrigatório para acesso aos barramentos de hardware e chamadas WMI |
+
+> [!NOTE]
+> Para instalar o driver **PawnIO** de forma automática pelo terminal, execute:
+> ```powershell
+> winget install namazso.PawnIO
+> ```
+> O driver PawnIO substitui o driver legado WinRing0, eliminando bloqueios de segurança do Microsoft Defender.
+
+---
+
+## <img src="https://api.iconify.design/solar/code-square-bold.svg?color=%230EA5E9&width=22" align="top" /> &nbsp;Como Rodar do Código-Fonte
+
+### Compilação e Depuração
+
+Certifique-se de possuir o [.NET 8 SDK](https://dotnet.microsoft.com/download) instalado no ambiente:
+
+```bash
+# Clone o repositório
+git clone https://github.com/OTheMandaloriano/ResetExplode.git
+
+# Acesse o diretório
 cd ResetExplode
+
+# Restaure as dependências e inicie o aplicativo
 dotnet run
 ```
-O app pede privilégio de administrador (necessário para sensores de baixo nível).
-Para levar a outro PC: dê dois cliques em `publicar.bat`. Ele gera `..\ResetExplode-dist\ResetExplode.exe` (arquivo único, com o .NET embutido,
-sem caminhos do seu usuário) + `LEIA-ME.txt`. No outro PC só é preciso instalar o PawnIO. Rode de novo após cada alteração no código.
 
-### Baixar a versão mais recente
-A cada push na `main`, o GitHub Actions (`.github/workflows/publicar.yml`) gera o `ResetExplode.exe` e atualiza a release
-**latest** (aba *Releases* do repositório), com o `.exe` e um `.zip`. É só baixar de lá, sem compilar.
-Ao criar uma tag (`git tag v0.12` e `git push --tags`), também sai uma release fixa dessa versão.
+### Gerando o Pacote de Distribuição
 
-## Observações
-- Se algum sensor não aparecer, depende do suporte da biblioteca à sua placa-mãe.
+Para compilar um executável único e independente de runtime (autônomo para envio a outros computadores):
 
-## Já feito
-- ✔ Informações do sistema, sensores, placa de vídeo, jogos, gargalo, overlay
-- ✔ Stress test com limite de temperatura (CPU, RAM, GPU)
-- ✔ Benchmarks: CPU, GPU, simulação, memória e **disco**
-- ✔ Saúde dos discos (S.M.A.R.T.)
-- ✔ Relatório exportável (HTML/JSON)
-- ✔ RESET OC (limite de energia, clock e verificação de estabilidade)
-- ✔ Energia (bateria e fonte) e Rede (latência, perda e velocidade)
-- ✔ RESET INTEGRAÇÃO: iluminação Corsair iCUE, OpenRGB (MSI/Gigabyte/ASUS) e Razer Chroma (primeira versão, em teste)
-- ✔ RESET DRIVER: inventário de drivers, NVIDIA (verifica a versão, baixa, confere a assinatura e abre o instalador), AMD/ASUS/MSI/Gigabyte pela página oficial, Windows Update e backup (`DriverManager.cs`, primeira versão, em teste)
-- ✔ RESET JOGOS: inicializador com detecção de jogos, perfil por jogo e opções de inicialização da Steam (primeira versão, em teste)
-- ✔ Inicialização do Windows: ativar, desativar e remover programas, com desfazer (v0.16)
-- ✔ Abertura rápida: janela na hora, hardware carregado em paralelo (v0.16)
-- ✔ Instalar apps essenciais pós-formatação pelo winget (v0.16)
-- ✔ RESET MAKER: portas COM e drivers seriais CH340/CP210x/FTDI/Prolific/Arduino (v0.16)
+```cmd
+publicar.bat
+```
 
-## Próximas ideias
-- Relatório em CSV e com gráficos
-- Comparar resultados de benchmark entre PCs / histórico de relatórios
-- Leitura direta de SPD / Super I/O
-- RESET INTEGRAÇÃO: perfis salvos, efeitos por jogo, SDKs nativos da MSI/ASUS/Gigabyte se forem liberados
-- Alertas de temperatura, bateria e saúde de disco em segundo plano
-- Versão com instalador e assinatura digital
+O script criará a pasta `..\ResetExplode-dist\` contendo o arquivo `ResetExplode.exe` compilado em modo Release, com todos os módulos essenciais unificados e sem dependências externas adicionais além do driver PawnIO.
 
-## Licença
+---
 
-MIT — veja o arquivo [LICENSE](LICENSE).
+## <img src="https://api.iconify.design/solar/layers-bold.svg?color=%230EA5E9&width=22" align="top" /> &nbsp;Arquitetura e Bibliotecas
+
+O projeto faz uso de bibliotecas consagradas de baixo nível e padrões modernos do ecossistema .NET:
+
+| Biblioteca / Recurso | Finalidade Técnica | Licenciamento |
+| :--- | :--- | :--- |
+| **LibreHardwareMonitorLib** | Comunicação com chips de monitoramento e sensores da placa-mãe | MPL 2.0 |
+| **TraceEvent (Microsoft)** | Coleta de telemetria de taxas de quadros via ETW (sem injeção de DLLs) | MIT |
+| **Vortice.Windows** | Bindings de baixo nível para Direct3D 11, Direct3D 12 e compilador DXC | MIT |
+| **NVML (NVIDIA)** | Acesso a métricas corporativas e limitadores de clock e tensão em GPUs NVIDIA | Proprietária / SDK |
+| **Windows WMI / PnP** | Extração de inventário do sistema operacional, memória e periféricos | Nativo Windows |
+
+---
+
+## <img src="https://api.iconify.design/solar/danger-triangle-bold.svg?color=%23F97316&width=22" align="top" /> &nbsp;Limitações Conhecidas
+
+| Limitação | Causa Técnica | Comportamento Observado |
+| :--- | :--- | :--- |
+| **Sensores de placas-mãe específicas** | Variação de circuitos Super I/O no mercado | Caso o chip não seja homologado na biblioteca de monitoramento, certas rotações de ventoinha podem não ser exibidas. |
+| **Overlay em tela cheia exclusiva** | O overlay opera como janela transparente com prioridade top-most via Direct3D | Jogos em modo exclusivo assumem controle total da superfície de renderização. O overlay requer modo janela ou janela sem bordas (borderless). |
+| **Estimativa de FPS sem chave de API** | A integração detalhada utiliza a API da HowManyFPS | Sem chave configurada, o cálculo de FPS é aproximado com base no banco de dados local heurístico (`GameCatalog.cs`). |
+
+---
+
+## <img src="https://api.iconify.design/solar/shield-check-bold.svg?color=%230EA5E9&width=22" align="top" /> &nbsp;Licença
+
+Este projeto é distribuído sob os termos da licença **MIT**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
